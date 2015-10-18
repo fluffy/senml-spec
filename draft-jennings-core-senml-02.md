@@ -95,7 +95,8 @@ informative:
   RFC5952: 
   RFC4122: 
   RFC0020: 
-  I-D.arkko-core-dev-urn: 
+  I-D.arkko-core-dev-urn:
+  I-D.greevenbosch-appsawg-cbor-cddl: 
   WADL:
     target: http://java.net/projects/wadl/sources/svn/content/trunk/www/wadl20090202.pdf
     title: Web Application Description Language (WADL)
@@ -583,6 +584,42 @@ unsigned integer is allowed.
 | Update Time               | ut         |          7 |
 {: #tbl-cbor-labels cols="r l r" title="CBOR representation: integers for map keys"}
 
+## CDDL 
+For reference, the CBOR representation can be described with the CDDL 
+{{I-D.greevenbosch-appsawg-cbor-cddl}} specification in {{senmlcddl}}. 
+
+~~~~ CDDL 
+SenML = {
+      ? bn => tstr,       ; Base Name 
+      ? bt => numeric,    ; Base Time 
+      ? bu => tstr,       ; Base Units 
+      ? ver => uint,      ; Version 
+      * tstr => any,      ; (Extension) 
+      e => [+ meas],      ; Measurements 
+}
+
+meas = {
+      ? n => tstr,        ; Name 
+      ? u => tstr,        ; Units 
+      ? ( v => numeric // ; Numeric Value 
+          sv => tstr //   ; String Value 
+          bv => bool )    ; Boolean Value 
+      ? s => numeric,     ; Value Sum 
+      ? t => numeric,     ; Time 
+      ? ut => numeric,    ; Update Time 
+}
+
+numeric = number / decfrac 
+
+ver = -1 
+e   = -2     v   =  2 
+bn  = -3     sv  =  3 
+bt  = -4     bv  =  4 
+bu  = -5     s   =  5 
+n   =  0     t   =  6 
+u   =  1     ut  =  7 
+~~~~
+{: #senmlcddl title="CDDL specification for CBOR SenML"}
 
 
 # XML Representation (application/senml+xml) {#sec-xml-examle}
