@@ -584,38 +584,72 @@ unsigned integer is allowed.
 | Update Time               | ut         |          7 |
 {: #tbl-cbor-labels cols="r l r" title="CBOR representation: integers for map keys"}
 
-## CDDL 
-For reference, the CBOR representation can be described with the CDDL 
-{{I-D.greevenbosch-appsawg-cbor-cddl}} specification in {{senmlcddl}}. 
+## CDDL
 
-~~~~ CDDL 
-SenML = {
-      ? bn => tstr,       ; Base Name 
-      ? bt => numeric,    ; Base Time 
-      ? bu => tstr,       ; Base Units 
-      ? ver => uint,      ; Version 
-      * tstr => any,      ; (Extension) 
-      e => [+ meas],      ; Measurements 
+For reference, the CBOR representation of SenML packs can be described with the CDDL 
+{{I-D.greevenbosch-appsawg-cbor-cddl}} specification in {{senmlcddl}}.
+This specification also applies to the JSON representation, when the
+integer labels and the binary string value are removed.
+
+~~~~ cddl 
+
+SenML-Pack = SenML-Pack-Defined .and SenML-Pack-Generic
+
+SenML-Pack-Defined = [initial-defined, * follow-on-defined]
+
+initial-defined = {
+  ? bn => tstr,       ; Base Name 
+  ? bt => numeric,    ; Base Time 
+  ? bu => tstr,       ; Base Units 
+  ? ver => uint,      ; Version 
+  follow-on-defined1,
+  + bkvp
 }
 
-meas = {
-      ? n => tstr,        ; Name 
-      ? u => tstr,        ; Units 
-      ? ( v => numeric // ; Numeric Value 
-          sv => tstr //   ; String Value 
-          bv => bool )    ; Boolean Value 
-      ? s => numeric,     ; Value Sum 
-      ? t => numeric,     ; Time 
-      ? ut => numeric,    ; Update Time 
+follow-on-defined1 = (
+   ? n => tstr,        ; Name 
+   ? u => tstr,        ; Units 
+   ? ( v => numeric // ; Numeric Value 
+       vs => tstr //   ; String Value 
+       vb => bool )    ; Boolean Value 
+   ? s => numeric,     ; Value Sum 
+   ? t => numeric,     ; Time 
+   ? ut => numeric,    ; Update Time 
+   * kvp
+)
+follow-on-defined = { follow-on-defined1 }
+
+SenML-Pack-Generic = [initial-record, * follow-on-record]
+
+follow-on = (
+  + kvp,
+)
+follow-on-record = { follow-on }
+
+initial-record = {
+  follow-on,
+  * bkvp,
 }
 
+kvp = (
+  non-b-label => value
+)
+
+bkvp = (
+  b-label => value
+)
+
+non-b-label = tstr .regexp  "[A-Zac-z0-9][-_:.A-Za-z0-9]*" / uint
+b-label = tstr .regexp  "b[-_:.A-Za-z0-9]+" / nint
+
+value = tstr / bstr / numeric / bool
 numeric = number / decfrac 
 
-ver = -1 
-e   = -2     v   =  2 
-bn  = -3     sv  =  3 
-bt  = -4     bv  =  4 
-bu  = -5     s   =  5 
+; CBOR version (use the labels)
+ver = -1     v   =  2 
+bn  = -2     vs  =  3 
+bt  = -3     vb  =  4 
+bu  = -4     s   =  5 
 n   =  0     t   =  6 
 u   =  1     ut  =  7 
 ~~~~
